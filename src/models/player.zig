@@ -10,7 +10,6 @@ fn distanceBySpeed(speedPerSecond: f32, diff: i64) f32 {
 pub const Player = struct {
     allocator: std.mem.Allocator,
     position: *rl.Vector2,
-    texture: *rl.Texture,
     direction: Direction,
     moving: bool,
 
@@ -18,15 +17,9 @@ pub const Player = struct {
         const alloc_position = try allocator.create(rl.Vector2);
         alloc_position.* = position;
 
-        const player = try rl.loadImage("assets/player-1.png");
-        const alloc_texture = try allocator.create(rl.Texture);
-        alloc_texture.* = try rl.loadTextureFromImage(player);
-        rl.unloadImage(player);
-
         return Player{
             .allocator = allocator,
             .position = alloc_position,
-            .texture = alloc_texture,
             .direction = Direction.LEFT,
             .moving = false,
         };
@@ -34,7 +27,6 @@ pub const Player = struct {
 
     pub fn deinit(self: *const Player) void {
         self.allocator.destroy(self.position);
-        self.allocator.destroy(self.texture);
     }
 
     pub fn draw(self: *const Player, diff: i64) void {
@@ -47,8 +39,6 @@ pub const Player = struct {
                 self.position.x += distanceBySpeed(speed, diff);
             }
         }
-
-        self.texture.drawV(self.position.*, .white);
     }
 
     pub fn startMoving(self: *Player, direction: Direction) void {
@@ -61,11 +51,10 @@ pub const Player = struct {
     }
 };
 
-// TODO: Figure out how to load assets during testing
-// test "Player - init" {
-//     const allocator = std.testing.allocator;
+test "Player - init" {
+    const allocator = std.testing.allocator;
 
-//     const v = rl.Vector2.init(1, 1);
-//     const player = try Player.init(allocator, v);
-//     player.deinit();
-// }
+    const v = rl.Vector2.init(1, 1);
+    const player = try Player.init(allocator, v);
+    player.deinit();
+}
