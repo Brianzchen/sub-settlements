@@ -1,13 +1,18 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const Direction = enum { LEFT, RIGHT };
+const Direction = @import("./direction.zig").Direction;
+
+fn distanceBySpeed(speedPerSecond: f32, diff: i64) f32 {
+    return speedPerSecond * (@as(f32, @floatFromInt(diff)) / 1000.0);
+}
 
 pub const Player = struct {
     allocator: std.mem.Allocator,
     position: *rl.Vector2,
     texture: *rl.Texture,
     direction: Direction,
+    moving: bool,
 
     pub fn init(allocator: std.mem.Allocator, position: rl.Vector2) !Player {
         const alloc_position = try allocator.create(rl.Vector2);
@@ -23,6 +28,7 @@ pub const Player = struct {
             .position = alloc_position,
             .texture = alloc_texture,
             .direction = Direction.LEFT,
+            .moving = false,
         };
     }
 
@@ -32,8 +38,26 @@ pub const Player = struct {
     }
 
     pub fn draw(self: *const Player, diff: i64) void {
-        std.debug.print("{d}", .{diff});
+        if (self.moving) {
+            const speed: f32 = 20.0;
+            if (self.direction == Direction.LEFT) {
+                self.position.x -= distanceBySpeed(speed, diff);
+            }
+            if (self.direction == Direction.RIGHT) {
+                self.position.x += distanceBySpeed(speed, diff);
+            }
+        }
+
         self.texture.drawV(self.position.*, .white);
+    }
+
+    pub fn startMoving(self: *Player, direction: Direction) void {
+        self.direction = direction;
+        self.moving = true;
+    }
+
+    pub fn stopMoving(self: *Player) void {
+        self.moving = false;
     }
 };
 

@@ -56,7 +56,7 @@ pub fn main() anyerror!void {
 
         player.draw(diff);
 
-        keyboardEvents(&player);
+        try keyboardEvents(allocator, &player);
 
         rl.drawText("Congrats! You created your first window!", 190, 200, 20, .light_gray);
         //----------------------------------------------------------------------------------
