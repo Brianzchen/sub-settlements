@@ -71,12 +71,13 @@ pub fn build(b: *std.Build) !void {
     const raylib_artifact = raylib_dep.artifact("raylib"); // raylib C library
     exe.linkLibrary(raylib_artifact);
 
-    // const domains = LocalModule{
-    //     .name = "domains",
-    //     .module = b.createModule(.{
-    //         .root_source_file = std.Build.LazyPath{ .cwd_relative = "src/domains/main.zig" },
-    //     }),
-    // };
+    const models = LocalModule{
+        .name = "models",
+        .module = b.createModule(.{
+            .root_source_file = std.Build.LazyPath{ .cwd_relative = "src/models/main.zig" },
+        }),
+    };
+    models.module.addImport("raylib", raylib);
     // const inMemoryStore = LocalModule{
     //     .name = "inMemoryStore",
     //     .module = b.createModule(.{
@@ -84,7 +85,7 @@ pub fn build(b: *std.Build) !void {
     //     }),
     // };
     // inMemoryStore.module.addImport(domains.name, domains.module);
-    const localModules = [_]LocalModule{};
+    const localModules = [_]LocalModule{models};
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();

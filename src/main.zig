@@ -1,7 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 const inputs = @import("./inputs/main.zig");
-const Player = @import("./models/player.zig").Player;
+const Player = @import("models").Player;
 
 const keyboardEvents = inputs.keyboardEvents;
 
@@ -32,8 +32,15 @@ pub fn main() anyerror!void {
     var player = try Player.init(allocator, rl.Vector2.init(100, 100));
     defer player.deinit();
 
+    // Time since start of game
+    var time = std.time.milliTimestamp();
+
     // Main game loop
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
+        const now = std.time.milliTimestamp();
+        const diff = now - time;
+        time = now;
+
         // Update
         //----------------------------------------------------------------------------------
         // TODO: Update your variables here
@@ -47,9 +54,9 @@ pub fn main() anyerror!void {
         rl.clearBackground(.white);
         rl.drawFPS(8, 8);
 
-        player.draw();
+        player.draw(diff);
 
-        keyboardEvents(player.position);
+        keyboardEvents(&player);
 
         rl.drawText("Congrats! You created your first window!", 190, 200, 20, .light_gray);
         //----------------------------------------------------------------------------------

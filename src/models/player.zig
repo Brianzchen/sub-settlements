@@ -31,7 +31,8 @@ pub const Player = struct {
         self.allocator.destroy(self.texture);
     }
 
-    pub fn draw(self: *const Player) void {
+    pub fn draw(self: *const Player, diff: i64) void {
+        std.debug.print("{d}", .{diff});
         self.texture.drawV(self.position.*, .white);
     }
 };
