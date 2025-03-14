@@ -1,7 +1,7 @@
 const std = @import("std");
 const rl = @import("raylib");
 const inputs = @import("./inputs/main.zig");
-const Player = @import("models").Player;
+const models = @import("models");
 const utils = @import("./utils/main.zig");
 
 const keyboardEvents = inputs.keyboardEvents;
@@ -30,13 +30,16 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    const playerTexture = try utils.loadImage(
-        allocator,
-        "assets/player-1.png",
-    );
+    const playerTexture = try utils.loadImage(allocator, "assets/player-1.png");
     defer allocator.destroy(playerTexture);
-    var player = try Player.init(allocator, rl.Vector2.init(100, 100));
+
+    const grassTexture = try utils.loadImage(allocator, "assets/grass.png");
+    defer allocator.destroy(grassTexture);
+
+    var player = try models.Player.init(allocator, rl.Vector2.init(100, 100));
     defer player.deinit();
+
+    _ = models.Floor.init();
 
     // Time since start of game
     var time = std.time.milliTimestamp();
@@ -62,6 +65,28 @@ pub fn main() anyerror!void {
 
         player.draw(diff);
         playerTexture.drawV(player.position.*, .white);
+
+        const offset = 100 + playerTexture.height;
+        grassTexture.draw(0, 0 + offset, .white);
+        grassTexture.draw(1 * 48, 0 + offset, .white);
+        grassTexture.draw(2 * 48, 0 + offset, .white);
+        grassTexture.draw(3 * 48, 0 + offset, .white);
+        grassTexture.draw(4 * 48, 0 + offset, .white);
+        grassTexture.draw(5 * 48, 0 + offset, .white);
+        grassTexture.draw(6 * 48, 0 + offset, .white);
+        grassTexture.draw(7 * 48, 0 + offset, .white);
+        grassTexture.draw(8 * 48, 0 + offset, .white);
+        // for (floor.grid, 0..) |row, y_ind| {
+        //     for (row, 0..) |_, x_ind| {
+        //         const texture = grassTexture;
+        //         texture.draw(
+        //             // TODO: Need to use texture.width/height but they are c_int
+        //             x_ind * 48,
+        //             y_ind * 48,
+        //             .white,
+        //         );
+        //     }
+        // }
 
         try keyboardEvents(allocator, &player);
 

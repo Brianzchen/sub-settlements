@@ -49,6 +49,10 @@ pub const Player = struct {
     pub fn stopMoving(self: *Player) void {
         self.moving = false;
     }
+
+    pub fn jump(self: *Player) void {
+        self.position.y -= 10;
+    }
 };
 
 test "Player - init" {

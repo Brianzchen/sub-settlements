@@ -19,7 +19,7 @@ pub fn keyboardEvents(allocator: std.mem.Allocator, player: *models.Player) !voi
         try currently_pressed_keys.append(allocator, .right);
     }
     if (rl.isKeyDown(.space)) {
-        //
+        player.jump();
     }
 
     var moving = false;
