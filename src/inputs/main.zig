@@ -22,21 +22,20 @@ pub fn keyboardEvents(allocator: std.mem.Allocator, player: *models.Player) !voi
         player.jump();
     }
 
-    var moving = false;
+    var has_left = false;
+    var has_right = false;
     var direction: models.Direction = .LEFT;
     for (currently_pressed_keys.items) |key| {
         if (key == rl.KeyboardKey.left) {
-            moving = true;
+            has_left = true;
             direction = .LEFT;
         } else if (key == rl.KeyboardKey.right) {
-            if (!moving) {
-                moving = true;
-                direction = .RIGHT;
-            }
+            has_right = true;
+            direction = .RIGHT;
         }
     }
 
-    if (moving) {
+    if ((has_left and !has_right) or (!has_left and has_right)) {
         player.startMoving(direction);
     } else {
         player.stopMoving();
