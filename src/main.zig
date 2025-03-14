@@ -5,6 +5,15 @@ const Player = @import("./models/player.zig").Player;
 
 const keyboardEvents = inputs.keyboardEvents;
 
+const Controls = enum {
+    MOVE_LEFT,
+    MOVE_RIGHT,
+    ATTACK,
+    CROUCH,
+    JUMP,
+    INTERACT,
+};
+
 pub fn main() anyerror!void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
@@ -40,7 +49,7 @@ pub fn main() anyerror!void {
 
         player.draw();
 
-        keyboardEvents(&player.position);
+        keyboardEvents(player.position);
 
         rl.drawText("Congrats! You created your first window!", 190, 200, 20, .light_gray);
         //----------------------------------------------------------------------------------
