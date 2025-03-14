@@ -14,4 +14,13 @@ pub fn keyboardEvents(player_position: *rl.Vector2) void {
     if (rl.isKeyUp(.right)) {
         //
     }
+    if (rl.isKeyDown(.a)) {
+        player_position.x = player_position.x - 1;
+    }
+    if (rl.isKeyDown(.d)) {
+        player_position.x = player_position.x + 1;
+    }
+    if (rl.isKeyDown(.space)) {
+        //
+    }
 }

@@ -28,7 +28,7 @@ pub fn build(b: *std.Build) !void {
     );
 
     const exe = b.addExecutable(.{
-        .name = "nexusider",
+        .name = "sub-settlements",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
@@ -61,6 +61,15 @@ pub fn build(b: *std.Build) !void {
     // This will evaluate the `run` step rather than the default, which is "install".
     const run_step = b.step("run", "Run the app");
     run_step.dependOn(&run_cmd.step);
+
+    const raylib_dep = b.dependency("raylib_zig", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    const raylib = raylib_dep.module("raylib"); // main raylib module
+    const raygui = raylib_dep.module("raygui"); // raygui module
+    const raylib_artifact = raylib_dep.artifact("raylib"); // raylib C library
+    exe.linkLibrary(raylib_artifact);
 
     // const domains = LocalModule{
     //     .name = "domains",
@@ -97,6 +106,8 @@ pub fn build(b: *std.Build) !void {
             .target = target,
             .optimize = optimize,
         });
+        exe_unit_tests.root_module.addImport("raylib", raylib);
+        exe_unit_tests.root_module.addImport("raygui", raygui);
         for (localModules) |localModule| {
             exe_unit_tests.root_module.addImport(localModule.name, localModule.module);
         }
@@ -104,22 +115,9 @@ pub fn build(b: *std.Build) !void {
         test_step.dependOn(&run_exe_unit_tests.step);
     }
 
-    const raylib_dep = b.dependency("raylib_zig", .{
-        .target = target,
-        .optimize = optimize,
-    });
-    const raylib = raylib_dep.module("raylib"); // main raylib module
-    const raygui = raylib_dep.module("raygui"); // raygui module
-    const raylib_artifact = raylib_dep.artifact("raylib"); // raylib C library
-    exe.linkLibrary(raylib_artifact);
     exe.root_module.addImport("raylib", raylib);
     exe.root_module.addImport("raygui", raygui);
 
-    // const httpz_module = b.dependency(
-    //     "httpz",
-    //     .{ .target = target, .optimize = optimize },
-    // ).module("httpz");
-    // exe.root_module.addImport("httpz", httpz_module);
     for (localModules) |localModule| {
         exe.root_module.addImport(localModule.name, localModule.module);
     }

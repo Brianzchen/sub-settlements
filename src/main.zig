@@ -1,9 +1,14 @@
+const std = @import("std");
 const rl = @import("raylib");
 const inputs = @import("./inputs/main.zig");
+const Player = @import("./models/player.zig").Player;
 
 const keyboardEvents = inputs.keyboardEvents;
 
 pub fn main() anyerror!void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+
     // Initialization
     //--------------------------------------------------------------------------------------
     const screenWidth = 800;
@@ -15,11 +20,8 @@ pub fn main() anyerror!void {
     rl.setTargetFPS(60); // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
 
-    const player = try rl.loadImage("assets/player-1.png");
-    const texture = try rl.loadTextureFromImage(player);
-    rl.unloadImage(player);
-
-    var player_position = rl.Vector2.init(100, 100);
+    var player = try Player.init(allocator, rl.Vector2.init(100, 100));
+    defer player.deinit();
 
     // Main game loop
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
@@ -36,9 +38,9 @@ pub fn main() anyerror!void {
         rl.clearBackground(.white);
         rl.drawFPS(8, 8);
 
-        texture.drawV(player_position, .white);
+        player.draw();
 
-        keyboardEvents(&player_position);
+        keyboardEvents(&player.position);
 
         rl.drawText("Congrats! You created your first window!", 190, 200, 20, .light_gray);
         //----------------------------------------------------------------------------------
