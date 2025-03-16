@@ -3,6 +3,7 @@ const rl = @import("raylib");
 const inputs = @import("./inputs/main.zig");
 const models = @import("models");
 const utils = @import("./utils/main.zig");
+// const systems = @import("systems");
 
 const keyboardEvents = inputs.keyboardEvents;
 
@@ -13,6 +14,98 @@ const Controls = enum {
     CROUCH,
     JUMP,
     INTERACT,
+};
+
+const HealthComponent = struct {};
+
+const GravityComponent = struct {
+    pub fn init() Component {
+        return Component{ .gravity = GravityComponent{} };
+    }
+};
+
+const Component = union(enum) {
+    health: HealthComponent,
+    gravity: GravityComponent,
+};
+
+const Entity = struct {
+    allocator: std.mem.Allocator,
+    id: u32,
+    components: std.ArrayListUnmanaged(Component),
+
+    pub fn init(allocator: std.mem.Allocator, id: u32) Entity {
+        return Entity{
+            .allocator = allocator,
+            .id = id,
+            .components = std.ArrayListUnmanaged(Component).empty,
+        };
+    }
+
+    pub fn deinit(self: *Entity) void {
+        self.components.deinit(self.allocator);
+    }
+
+    pub fn addComponent(self: *Entity, component: Component) !void {
+        try self.components.append(
+            self.allocator,
+            component,
+        );
+    }
+};
+
+const EntityPool = struct {
+    allocator: std.mem.Allocator,
+    entities: std.ArrayListUnmanaged(Entity),
+
+    pub fn init(allocator: std.mem.Allocator) EntityPool {
+        const entities: std.ArrayListUnmanaged(Entity) = .empty;
+
+        return EntityPool{
+            .allocator = allocator,
+            .entities = entities,
+        };
+    }
+
+    pub fn deinit(self: *EntityPool) void {
+        self.entities.deinit(self.allocator);
+    }
+
+    pub fn createEntity(self: *EntityPool, allocator: std.mem.Allocator) !Entity {
+        const entity = Entity.init(self.allocator, @intCast(self.entities.items.len + 1));
+        try self.entities.append(allocator, entity);
+
+        return self.entities.getLast();
+    }
+};
+
+const CollisionSystem = struct {
+    allocator: std.mem.Allocator,
+    entities: std.ArrayListUnmanaged(Entity),
+
+    pub fn init(allocator: std.mem.Allocator) CollisionSystem {
+        const entities: std.ArrayListUnmanaged(Entity) = .empty;
+
+        return CollisionSystem{
+            .allocator = allocator,
+            .entities = entities,
+        };
+    }
+
+    pub fn deinit(self: *const CollisionSystem) void {
+        self.entities.deinit(self.allocator);
+    }
+
+    pub fn addEntity(self: *CollisionSystem, entity: Entity) !void {
+        try self.entities.append(self.allocator, entity);
+    }
+
+    /// Runs every tick checking if there is a collision or not between
+    /// other entities on all directions, depending if there is or isn't then
+    /// we influence entities in a particular way
+    pub fn update(self: *const CollisionSystem) void {
+        _ = self;
+    }
 };
 
 pub fn main() anyerror!void {
@@ -41,7 +134,16 @@ pub fn main() anyerror!void {
     var player = try models.Player.init(allocator, rl.Vector2.init(100, 100));
     defer player.deinit();
 
+    var entity_pool = EntityPool.init(allocator);
+    defer entity_pool.deinit();
+
+    var player_entity = try entity_pool.createEntity(allocator);
+    try player_entity.addComponent(GravityComponent.init());
+
     const floor = try models.Floor.init(allocator);
+
+    var collisionSystem = CollisionSystem.init(allocator);
+    try collisionSystem.addEntity(player_entity);
 
     // Time since start of game
     var time = std.time.milliTimestamp();
@@ -57,6 +159,8 @@ pub fn main() anyerror!void {
 
         rl.clearBackground(.white);
         rl.drawFPS(8, 8);
+
+        collisionSystem.update();
 
         player.draw(diff);
         playerTexture.drawV(player.position.*, .white);

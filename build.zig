@@ -78,14 +78,15 @@ pub fn build(b: *std.Build) !void {
         }),
     };
     models.module.addImport("raylib", raylib);
-    // const inMemoryStore = LocalModule{
-    //     .name = "inMemoryStore",
-    //     .module = b.createModule(.{
-    //         .root_source_file = std.Build.LazyPath{ .cwd_relative = "src/persistence/in-memory-store.zig" },
-    //     }),
-    // };
-    // inMemoryStore.module.addImport(domains.name, domains.module);
-    const localModules = [_]LocalModule{models};
+    const systems = LocalModule{
+        .name = "systems",
+        .module = b.createModule(.{
+            .root_source_file = std.Build.LazyPath{ .cwd_relative = "src/systems/main.zig" },
+        }),
+    };
+    systems.module.addImport("raylib", raylib);
+    systems.module.addImport(models.name, models.module);
+    const localModules = [_]LocalModule{ models, systems };
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
