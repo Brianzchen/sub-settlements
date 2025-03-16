@@ -39,10 +39,29 @@ pub fn main() anyerror!void {
     var player = try models.Player.init(allocator, rl.Vector2.init(100, 100));
     defer player.deinit();
 
-    _ = models.Floor.init();
+    const floor = try models.Floor.init(allocator);
 
     // Time since start of game
     var time = std.time.milliTimestamp();
+
+    std.debug.print("{d}\n", .{floor.grid.items.len});
+    for (floor.grid.items, 0..) |row, y_ind| {
+        std.debug.print("{d} {d}\n", .{ row.items.len, y_ind });
+        // for (row.items, 0..) |_, x_ind| {
+        //     // TODO this is just printing everything atm not the amount of items in row???
+        //     const texture = grassTexture;
+        //     const width: i32 = @intCast(texture.width);
+        //     const x: i32 = @intCast(x_ind);
+        //     const height: i32 = @intCast(texture.height);
+        //     const y: i32 = @intCast(y_ind);
+        //     std.debug.print("{d} {d} {d} {d}\n", .{ width, x, height, y });
+        //     // texture.draw(
+        //     //     x * width,
+        //     //     y * height,
+        //     //     .white,
+        //     // );
+        // }
+    }
 
     // Main game loop
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
@@ -50,13 +69,6 @@ pub fn main() anyerror!void {
         const diff = now - time;
         time = now;
 
-        // Update
-        //----------------------------------------------------------------------------------
-        // TODO: Update your variables here
-        //----------------------------------------------------------------------------------
-
-        // Draw
-        //----------------------------------------------------------------------------------
         rl.beginDrawing();
         defer rl.endDrawing();
 
@@ -67,30 +79,25 @@ pub fn main() anyerror!void {
         playerTexture.drawV(player.position.*, .white);
 
         const offset = 100 + playerTexture.height;
-        grassTexture.draw(0, 0 + offset, .white);
-        grassTexture.draw(1 * 48, 0 + offset, .white);
-        grassTexture.draw(2 * 48, 0 + offset, .white);
-        grassTexture.draw(3 * 48, 0 + offset, .white);
-        grassTexture.draw(4 * 48, 0 + offset, .white);
-        grassTexture.draw(5 * 48, 0 + offset, .white);
-        grassTexture.draw(6 * 48, 0 + offset, .white);
-        grassTexture.draw(7 * 48, 0 + offset, .white);
-        grassTexture.draw(8 * 48, 0 + offset, .white);
-        // for (floor.grid, 0..) |row, y_ind| {
-        //     for (row, 0..) |_, x_ind| {
-        //         const texture = grassTexture;
-        //         texture.draw(
-        //             // TODO: Need to use texture.width/height but they are c_int
-        //             x_ind * 48,
-        //             y_ind * 48,
-        //             .white,
-        //         );
-        //     }
-        // }
+
+        for (floor.grid.items, 0..) |row, y_ind| {
+            for (row.items, 0..) |_, x_ind| {
+                // TODO: swap texture
+                const texture = grassTexture;
+                const width: i32 = @intCast(texture.width);
+                const x: i32 = @intCast(x_ind);
+                const height: i32 = @intCast(texture.height);
+                const y: i32 = @intCast(y_ind);
+                texture.draw(
+                    x * width,
+                    y * height + offset,
+                    .white,
+                );
+            }
+        }
 
         try keyboardEvents(allocator, &player);
 
-        rl.drawText("Congrats! You created your first window!", 190, 200, 20, .light_gray);
-        //----------------------------------------------------------------------------------
+        rl.drawText("Sub Settlements", 190, 50, 20, .light_gray);
     }
 }

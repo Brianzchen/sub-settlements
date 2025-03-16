@@ -12,6 +12,8 @@ pub const Player = struct {
     position: *rl.Vector2,
     direction: Direction,
     moving: bool,
+    /// Duration since falling
+    falling: i64,
 
     pub fn init(allocator: std.mem.Allocator, position: rl.Vector2) !Player {
         const alloc_position = try allocator.create(rl.Vector2);
@@ -22,6 +24,7 @@ pub const Player = struct {
             .position = alloc_position,
             .direction = Direction.LEFT,
             .moving = false,
+            .falling = 0,
         };
     }
 
@@ -52,6 +55,12 @@ pub const Player = struct {
 
     pub fn jump(self: *Player) void {
         self.position.y -= 10;
+    }
+
+    pub fn collisionBottom(self: *const Player, collided: bool) void {
+        if (!collided) {
+            if (self.falling) {}
+        }
     }
 };
 
