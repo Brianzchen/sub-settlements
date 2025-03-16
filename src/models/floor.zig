@@ -1,9 +1,6 @@
 const std = @import("std");
 
-const TileType = enum {
-    EMPTY,
-    GRASS,
-};
+const TileType = @import("./tile_types.zig").TileType;
 
 pub const Floor = struct {
     allocator: std.mem.Allocator,

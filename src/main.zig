@@ -35,6 +35,8 @@ pub fn main() anyerror!void {
 
     const grassTexture = try utils.loadImage(allocator, "assets/grass.png");
     defer allocator.destroy(grassTexture);
+    const emptyTexture = try utils.loadImage(allocator, "assets/empty-block.png");
+    defer allocator.destroy(emptyTexture);
 
     var player = try models.Player.init(allocator, rl.Vector2.init(100, 100));
     defer player.deinit();
@@ -43,25 +45,6 @@ pub fn main() anyerror!void {
 
     // Time since start of game
     var time = std.time.milliTimestamp();
-
-    std.debug.print("{d}\n", .{floor.grid.items.len});
-    for (floor.grid.items, 0..) |row, y_ind| {
-        std.debug.print("{d} {d}\n", .{ row.items.len, y_ind });
-        // for (row.items, 0..) |_, x_ind| {
-        //     // TODO this is just printing everything atm not the amount of items in row???
-        //     const texture = grassTexture;
-        //     const width: i32 = @intCast(texture.width);
-        //     const x: i32 = @intCast(x_ind);
-        //     const height: i32 = @intCast(texture.height);
-        //     const y: i32 = @intCast(y_ind);
-        //     std.debug.print("{d} {d} {d} {d}\n", .{ width, x, height, y });
-        //     // texture.draw(
-        //     //     x * width,
-        //     //     y * height,
-        //     //     .white,
-        //     // );
-        // }
-    }
 
     // Main game loop
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
@@ -81,9 +64,11 @@ pub fn main() anyerror!void {
         const offset = 100 + playerTexture.height;
 
         for (floor.grid.items, 0..) |row, y_ind| {
-            for (row.items, 0..) |_, x_ind| {
-                // TODO: swap texture
-                const texture = grassTexture;
+            for (row.items, 0..) |tile, x_ind| {
+                var texture = emptyTexture;
+                if (tile == models.TileType.GRASS) {
+                    texture = grassTexture;
+                }
                 const width: i32 = @intCast(texture.width);
                 const x: i32 = @intCast(x_ind);
                 const height: i32 = @intCast(texture.height);
