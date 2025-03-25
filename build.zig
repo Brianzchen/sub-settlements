@@ -78,6 +78,12 @@ pub fn build(b: *std.Build) !void {
         }),
     };
     models.module.addImport("raylib", raylib);
+    const components = LocalModule{
+        .name = "components",
+        .module = b.createModule(.{
+            .root_source_file = std.Build.LazyPath{ .cwd_relative = "src/components/main.zig" },
+        }),
+    };
     const systems = LocalModule{
         .name = "systems",
         .module = b.createModule(.{
@@ -86,7 +92,7 @@ pub fn build(b: *std.Build) !void {
     };
     systems.module.addImport("raylib", raylib);
     systems.module.addImport(models.name, models.module);
-    const localModules = [_]LocalModule{ models, systems };
+    const localModules = [_]LocalModule{ models, components, systems };
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
