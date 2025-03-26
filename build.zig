@@ -84,6 +84,7 @@ pub fn build(b: *std.Build) !void {
             .root_source_file = std.Build.LazyPath{ .cwd_relative = "src/components/main.zig" },
         }),
     };
+    components.module.addImport("raylib", raylib);
     const systems = LocalModule{
         .name = "systems",
         .module = b.createModule(.{
