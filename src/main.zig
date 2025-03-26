@@ -81,30 +81,33 @@ const EntityPool = struct {
 
 const CollisionSystem = struct {
     allocator: std.mem.Allocator,
-    entities: std.ArrayListUnmanaged(Entity),
+    entity_pool: EntityPool,
 
-    pub fn init(allocator: std.mem.Allocator) CollisionSystem {
-        const entities: std.ArrayListUnmanaged(Entity) = .empty;
-
+    pub fn init(allocator: std.mem.Allocator, entity_pool: EntityPool) CollisionSystem {
         return CollisionSystem{
             .allocator = allocator,
-            .entities = entities,
+            .entity_pool = entity_pool,
         };
     }
 
-    pub fn deinit(self: *const CollisionSystem) void {
-        self.entities.deinit(self.allocator);
-    }
-
-    pub fn addEntity(self: *CollisionSystem, entity: Entity) !void {
-        try self.entities.append(self.allocator, entity);
-    }
+    pub fn deinit(_: *const CollisionSystem) void {}
 
     /// Runs every tick checking if there is a collision or not between
     /// other entities on all directions, depending if there is or isn't then
     /// we influence entities in a particular way
     pub fn update(self: *const CollisionSystem) void {
-        _ = self;
+        for (self.entity_pool.entities.items) |entity| {
+            for (entity.components.items) |component| {
+                switch (component) {
+                    .health => |_| {
+                        std.debug.print("i am health", .{});
+                    },
+                    .gravity => |_| {
+                        std.debug.print("i am gravity", .{});
+                    },
+                }
+            }
+        }
     }
 };
 
@@ -142,8 +145,7 @@ pub fn main() anyerror!void {
 
     const floor = try models.Floor.init(allocator);
 
-    var collisionSystem = CollisionSystem.init(allocator);
-    try collisionSystem.addEntity(player_entity);
+    const collisionSystem = CollisionSystem.init(allocator, entity_pool);
 
     // Time since start of game
     var time = std.time.milliTimestamp();
