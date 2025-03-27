@@ -3,7 +3,7 @@ const rl = @import("raylib");
 const components = @import("components");
 
 const ActOn = struct {
-    movement: components.Movement,
+    moveable: components.Moveable,
     position: components.Position,
     direction: components.Direction,
 };
@@ -47,15 +47,15 @@ test "Movement - add entity" {
     var movement = Movement.init(allocator);
     defer movement.deinit();
 
-    const movementComp = try components.Movement.init(allocator, 5.0);
-    defer movementComp.deinit();
+    const moveableComp = try components.Moveable.init(allocator, 5.0);
+    defer moveableComp.deinit();
     const positionComp = try components.Position.init(allocator, 0, 0);
     defer positionComp.deinit();
     const directionComp = try components.Direction.init(allocator, 40);
     defer directionComp.deinit();
 
     try movement.addEntity(.{
-        .movement = movementComp,
+        .moveable = moveableComp,
         .direction = directionComp,
         .position = positionComp,
     });

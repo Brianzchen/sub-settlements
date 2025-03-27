@@ -1,38 +1,38 @@
 const std = @import("std");
 
-pub const Movement = struct {
+pub const Moveable = struct {
     allocator: std.mem.Allocator,
     /// Units typically pixels per second
     speed: *f32,
     moving: *bool,
 
-    pub fn init(allocator: std.mem.Allocator, initialSpeed: f32) !Movement {
+    pub fn init(allocator: std.mem.Allocator, initialSpeed: f32) !Moveable {
         const speed = try allocator.create(f32);
         speed.* = initialSpeed;
         const moving = try allocator.create(bool);
         moving.* = false;
 
-        return Movement{
+        return Moveable{
             .allocator = allocator,
             .speed = speed,
             .moving = moving,
         };
     }
 
-    pub fn deinit(self: *const Movement) void {
+    pub fn deinit(self: *const Moveable) void {
         self.allocator.destroy(self.speed);
         self.allocator.destroy(self.moving);
     }
 
-    pub fn startMoving(self: *const Movement) void {
+    pub fn startMoving(self: *const Moveable) void {
         self.moving.* = true;
     }
 
-    pub fn stopMoving(self: *const Movement) void {
+    pub fn stopMoving(self: *const Moveable) void {
         self.moving.* = false;
     }
 
-    pub fn updateSpeed(self: *const Movement, speed: f32) void {
+    pub fn updateSpeed(self: *const Moveable, speed: f32) void {
         self.speed.* = speed;
     }
 };
@@ -40,7 +40,7 @@ pub const Movement = struct {
 test "Movement - init" {
     const allocator = std.testing.allocator;
 
-    const movement = try Movement.init(allocator, 5.0);
+    const movement = try Moveable.init(allocator, 5.0);
     defer movement.deinit();
 
     try std.testing.expect(movement.speed.* == 5.0);
@@ -50,7 +50,7 @@ test "Movement - init" {
 test "Movement - start moving" {
     const allocator = std.testing.allocator;
 
-    const movement = try Movement.init(allocator, 5.0);
+    const movement = try Moveable.init(allocator, 5.0);
     defer movement.deinit();
 
     movement.startMoving();
@@ -62,7 +62,7 @@ test "Movement - start moving" {
 test "Movement - stop moving" {
     const allocator = std.testing.allocator;
 
-    const movement = try Movement.init(allocator, 5.0);
+    const movement = try Moveable.init(allocator, 5.0);
     defer movement.deinit();
 
     movement.startMoving();
@@ -75,7 +75,7 @@ test "Movement - stop moving" {
 test "Movement - update speed" {
     const allocator = std.testing.allocator;
 
-    const movement = try Movement.init(allocator, 5.0);
+    const movement = try Moveable.init(allocator, 5.0);
     defer movement.deinit();
 
     movement.updateSpeed(5.1);

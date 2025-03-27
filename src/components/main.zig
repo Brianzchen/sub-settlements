@@ -1,3 +1,3 @@
 pub const Direction = @import("./direction.zig").Direction;
-pub const Movement = @import("./movement.zig").Movement;
+pub const Moveable = @import("./moveable.zig").Moveable;
 pub const Position = @import("./position.zig").Position;
