@@ -3,7 +3,8 @@ const rl = @import("raylib");
 const inputs = @import("./inputs/main.zig");
 const models = @import("models");
 const utils = @import("./utils/main.zig");
-// const systems = @import("systems");
+const components = @import("components");
+const systems = @import("systems");
 
 const keyboardEvents = inputs.keyboardEvents;
 
@@ -115,6 +116,14 @@ pub fn main() anyerror!void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
 
+    var movementSystem = systems.MovementSys.init(allocator);
+    const entity_1 = systems.MovementSys.Entity{
+        .direction = try components.Direction.init(allocator, 20.0),
+        .moveable = try components.Moveable.init(allocator, 5),
+        .position = try components.Position.init(allocator, 0, 0),
+    };
+    try movementSystem.addEntity(entity_1);
+
     // Initialization
     //--------------------------------------------------------------------------------------
     const screenWidth = 800;
@@ -153,7 +162,7 @@ pub fn main() anyerror!void {
     // Main game loop
     while (!rl.windowShouldClose()) { // Detect window close button or ESC key
         const now = std.time.milliTimestamp();
-        const diff = now - time;
+        const delta = now - time;
         time = now;
 
         rl.beginDrawing();
@@ -164,7 +173,7 @@ pub fn main() anyerror!void {
 
         collisionSystem.update();
 
-        player.draw(diff);
+        player.draw(delta);
         playerTexture.drawV(player.position.*, .white);
 
         const offset = 100 + playerTexture.height;
@@ -186,6 +195,8 @@ pub fn main() anyerror!void {
                 );
             }
         }
+
+        movementSystem.update(delta);
 
         try keyboardEvents(allocator, &player);
 

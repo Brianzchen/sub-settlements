@@ -2,12 +2,6 @@ const std = @import("std");
 const rl = @import("raylib");
 const components = @import("components");
 
-const ActOn = struct {
-    moveable: components.Moveable,
-    position: components.Position,
-    direction: components.Direction,
-};
-
 fn distanceBySpeed(speedPerSecond: f32, diff: i64) f32 {
     return speedPerSecond * (@as(f32, @floatFromInt(diff)) / 1000.0);
 }
@@ -24,12 +18,18 @@ fn updatePosition(x: f64, y: f32, degrees: f32, distance: f32) struct { x: f32, 
 
 pub const Movement = struct {
     allocator: std.mem.Allocator,
-    entities: std.ArrayListUnmanaged(ActOn),
+    entities: std.ArrayListUnmanaged(Entity),
+
+    pub const Entity = struct {
+        moveable: components.Moveable,
+        position: components.Position,
+        direction: components.Direction,
+    };
 
     pub fn init(allocator: std.mem.Allocator) Movement {
         return Movement{
             .allocator = allocator,
-            .entities = std.ArrayListUnmanaged(ActOn).empty,
+            .entities = std.ArrayListUnmanaged(Entity).empty,
         };
     }
 
@@ -37,7 +37,7 @@ pub const Movement = struct {
         self.entities.deinit(self.allocator);
     }
 
-    pub fn addEntity(self: *Movement, entity: ActOn) !void {
+    pub fn addEntity(self: *Movement, entity: Entity) !void {
         try self.entities.append(self.allocator, entity);
     }
 

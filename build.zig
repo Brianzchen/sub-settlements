@@ -93,6 +93,7 @@ pub fn build(b: *std.Build) !void {
     };
     systems.module.addImport("raylib", raylib);
     systems.module.addImport(models.name, models.module);
+    systems.module.addImport(components.name, components.module);
     const localModules = [_]LocalModule{ models, components, systems };
 
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
