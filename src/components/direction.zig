@@ -19,7 +19,7 @@ pub const Direction = struct {
         self.allocator.destroy(self.direction);
     }
 
-    pub fn updateDirection(self: *const Direction, newDirection: f32) !void {
+    pub fn updateDirection(self: *const Direction, newDirection: f32) void {
         self.direction.* = @mod(newDirection, 360);
     }
 };
@@ -39,7 +39,7 @@ test "Direction - change direction" {
     const direction = try Direction.init(allocator, 0.0);
     defer direction.deinit();
 
-    try direction.updateDirection(240.0);
+    direction.updateDirection(240.0);
 
     try std.testing.expect(direction.direction.* == 240.0);
 }
@@ -50,9 +50,9 @@ test "Direction - change direction overflow" {
     const direction = try Direction.init(allocator, 0.0);
     defer direction.deinit();
 
-    try direction.updateDirection(480.0);
+    direction.updateDirection(480.0);
     try std.testing.expect(direction.direction.* == 120.0);
 
-    try direction.updateDirection(360.0);
+    direction.updateDirection(360.0);
     try std.testing.expect(direction.direction.* == 0.0);
 }

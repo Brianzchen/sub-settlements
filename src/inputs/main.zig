@@ -2,8 +2,12 @@ const std = @import("std");
 const rl = @import("raylib");
 
 const models = @import("models");
+const systems = @import("systems");
 
-pub fn keyboardEvents(allocator: std.mem.Allocator, player: *models.Player) !void {
+pub fn keyboardEvents(
+    allocator: std.mem.Allocator,
+    player: systems.MovementSys.Entity,
+) !void {
     var currently_pressed_keys: std.ArrayListUnmanaged(rl.KeyboardKey) = .empty;
 
     if (rl.isKeyDown(.left)) {
@@ -19,7 +23,7 @@ pub fn keyboardEvents(allocator: std.mem.Allocator, player: *models.Player) !voi
         try currently_pressed_keys.append(allocator, .right);
     }
     if (rl.isKeyDown(.space)) {
-        player.jump();
+        // player.jump();
     }
 
     var has_left = false;
@@ -36,8 +40,14 @@ pub fn keyboardEvents(allocator: std.mem.Allocator, player: *models.Player) !voi
     }
 
     if ((has_left and !has_right) or (!has_left and has_right)) {
-        player.startMoving(direction);
+        if (has_left) {
+            player.direction.updateDirection(270.0);
+        }
+        if (has_right) {
+            player.direction.updateDirection(90.0);
+        }
+        player.moveable.startMoving();
     } else {
-        player.stopMoving();
+        player.moveable.stopMoving();
     }
 }
