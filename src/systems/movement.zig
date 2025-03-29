@@ -21,10 +21,20 @@ pub const Movement = struct {
     entities: std.ArrayListUnmanaged(Entity),
 
     pub const Entity = struct {
+        id: usize,
         moveable: components.Moveable,
         position: components.Position,
         direction: components.Direction,
     };
+
+    pub fn pullComponents(entity: anytype) Entity {
+        return Entity{
+            .id = entity.id,
+            .moveable = entity.moveable,
+            .position = entity.position,
+            .direction = entity.direction,
+        };
+    }
 
     pub fn init(allocator: std.mem.Allocator) Movement {
         return Movement{

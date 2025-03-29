@@ -1,12 +1,9 @@
 const std = @import("std");
 const rl = @import("raylib");
-const inputs = @import("./inputs/main.zig");
 const models = @import("models");
 const utils = @import("./utils/main.zig");
 const components = @import("components");
 const systems = @import("systems");
-
-const keyboardEvents = inputs.keyboardEvents;
 
 const Controls = enum {
     MOVE_LEFT,
@@ -21,13 +18,26 @@ pub fn main() anyerror!void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
 
+    var entity_pool = utils.EntityPool.init(allocator);
+
     var movementSystem = systems.MovementSys.init(allocator);
-    const entity_1 = systems.MovementSys.Entity{
+    const player_entity = .{
+        .id = try entity_pool.addEntity(),
         .direction = try components.Direction.init(allocator, 20.0),
         .moveable = try components.Moveable.init(allocator, 20.0),
         .position = try components.Position.init(allocator, 0, 0),
     };
-    try movementSystem.addEntity(entity_1);
+    try movementSystem.addEntity(
+        systems.MovementSys.pullComponents(player_entity),
+    );
+
+    const inputSystem = systems.InputSys.init(
+        allocator,
+        systems.InputSys.pullEntity(player_entity),
+    );
+    defer inputSystem.deinit();
+
+    // const tree_entity =
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -59,9 +69,8 @@ pub fn main() anyerror!void {
         const delta = now - time;
         time = now;
 
-        try keyboardEvents(allocator, entity_1);
-
         // Systems
+        try inputSystem.update(delta);
         movementSystem.update(delta);
 
         // Drawing
@@ -92,7 +101,7 @@ pub fn main() anyerror!void {
         }
 
         playerTexture.drawV(
-            entity_1.position.position.add(rl.Vector2.init(100.0, 100.0)),
+            player_entity.position.position.add(rl.Vector2.init(100.0, 100.0)),
             .white,
         );
         rl.drawText("Sub Settlements", 190, 50, 20, .light_gray);

@@ -4,6 +4,8 @@ const rl = @import("raylib");
 pub const Position = struct {
     allocator: std.mem.Allocator,
     position: *rl.Vector2,
+    width: f32,
+    height: f32,
 
     pub fn init(allocator: std.mem.Allocator, x: f32, y: f32) !Position {
         const position = try allocator.create(rl.Vector2);
@@ -12,6 +14,8 @@ pub const Position = struct {
         return Position{
             .allocator = allocator,
             .position = position,
+            .width = 0.0,
+            .height = 0.0,
         };
     }
 
@@ -23,13 +27,17 @@ pub const Position = struct {
         self.position.x = x;
         self.position.y = y;
     }
+
+    pub fn updateSize(self: *Position, width: f32, height: f32) void {
+        self.width = width;
+        self.height = height;
+    }
 };
 
 test "Position - init" {
     const allocator = std.testing.allocator;
 
-    const initialPos = rl.Vector2.init(0, 0);
-    const position = try Position.init(allocator, initialPos);
+    const position = try Position.init(allocator, 0, 0);
     defer position.deinit();
 }
 
@@ -43,4 +51,16 @@ test "Position - update position" {
 
     try std.testing.expect(position.position.x == 1.0);
     try std.testing.expect(position.position.y == 2.0);
+}
+
+test "Position - update size" {
+    const allocator = std.testing.allocator;
+
+    var position = try Position.init(allocator, 0, 0);
+    defer position.deinit();
+
+    position.updateSize(1.0, 2.0);
+
+    try std.testing.expect(position.width == 1.0);
+    try std.testing.expect(position.height == 2.0);
 }

@@ -1,30 +1,33 @@
 const std = @import("std");
+const components = @import("components");
 
-pub const CollisionSystem = struct {
+pub const Movement = struct {
     allocator: std.mem.Allocator,
-    entities: std.ArrayListUnmanaged(u32),
+    entities: std.ArrayListUnmanaged(Entity),
 
-    pub fn init(allocator: std.mem.Allocator) CollisionSystem {
-        const entities: std.ArrayListUnmanaged(u32) = .empty;
+    pub const Entity = struct {
+        id: usize,
+        position: components.Position,
+    };
 
-        return CollisionSystem{
+    pub fn init(allocator: std.mem.Allocator) Movement {
+        return Movement{
             .allocator = allocator,
-            .entities = entities,
+            .entities = std.ArrayListUnmanaged(Entity).empty,
         };
     }
 
-    pub fn deinit(self: *const CollisionSystem) void {
+    pub fn deinit(self: *Movement) void {
         self.entities.deinit(self.allocator);
     }
 
-    pub fn addEntity(self: *CollisionSystem, entity: u32) !void {
+    pub fn addEntity(self: *Movement, entity: Entity) !void {
         try self.entities.append(self.allocator, entity);
     }
 
-    /// Runs every tick checking if there is a collision or not between
-    /// other entities on all directions, depending if there is or isn't then
-    /// we influence entities in a particular way
-    pub fn update(self: *const CollisionSystem) void {
-        _ = self;
+    /// Runs every tick
+    pub fn update(self: *const Movement, delta: i64) void {
+        _ = delta;
+        for (self.entities.items) |_| {}
     }
 };
