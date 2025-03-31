@@ -20,7 +20,11 @@ pub fn main() anyerror!void {
 
     var entity_pool = utils.EntityPool.init(allocator);
 
+    var collisionSystem = systems.CollisionSys.init(allocator);
+    defer collisionSystem.deinit();
+
     var movementSystem = systems.MovementSys.init(allocator);
+    defer movementSystem.deinit();
     const player_entity = .{
         .id = try entity_pool.addEntity(),
         .direction = try components.Direction.init(allocator, 20.0),
@@ -30,14 +34,27 @@ pub fn main() anyerror!void {
     try movementSystem.addEntity(
         systems.MovementSys.pullComponents(player_entity),
     );
+    try collisionSystem.addEntity(
+        systems.CollisionSys.pullEntity(player_entity),
+    );
+
+    var tree_entity = .{
+        .id = try entity_pool.addEntity(),
+        .position = try components.Position.init(allocator, -20, 0),
+    };
+    tree_entity.position.updateSize(10, 100);
+    try movementSystem.addEntity(
+        systems.MovementSys.pullComponents(player_entity),
+    );
+    try collisionSystem.addInfluenceEntity(
+        systems.CollisionSys.pullInfluenceEntity(tree_entity),
+    );
 
     const inputSystem = systems.InputSys.init(
         allocator,
         systems.InputSys.pullEntity(player_entity),
     );
     defer inputSystem.deinit();
-
-    // const tree_entity =
 
     // Initialization
     //--------------------------------------------------------------------------------------
@@ -71,6 +88,7 @@ pub fn main() anyerror!void {
 
         // Systems
         try inputSystem.update(delta);
+        collisionSystem.update(delta);
         movementSystem.update(delta);
 
         // Drawing
@@ -102,6 +120,10 @@ pub fn main() anyerror!void {
 
         playerTexture.drawV(
             player_entity.position.position.add(rl.Vector2.init(100.0, 100.0)),
+            .white,
+        );
+        grassTexture.drawV(
+            tree_entity.position.position.add(rl.Vector2.init(100.0, 100.0)),
             .white,
         );
         rl.drawText("Sub Settlements", 190, 50, 20, .light_gray);

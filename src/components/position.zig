@@ -4,7 +4,9 @@ const rl = @import("raylib");
 pub const Position = struct {
     allocator: std.mem.Allocator,
     position: *rl.Vector2,
+    /// Total width where position is center point
     width: f32,
+    /// Total height where position is center point
     height: f32,
 
     pub fn init(allocator: std.mem.Allocator, x: f32, y: f32) !Position {
